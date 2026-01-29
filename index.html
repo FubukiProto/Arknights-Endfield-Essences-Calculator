@@ -80,6 +80,17 @@
                         </select>
                     </div>
                 </div>
+                <div class="mb-4">
+                    <select id="base-attribute-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary mb-2">
+                        <option value="all">全部基础属性</option>
+                    </select>
+                    <select id="additional-attribute-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary mb-2">
+                        <option value="all">全部附加属性</option>
+                    </select>
+                    <select id="skill-attribute-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="all">全部技能属性</option>
+                    </select>
+                </div>
                 <div class="mb-4 flex gap-2">
                     <button id="select-all-btn" class="w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-md text-sm transition-all">
                         <i class="fa fa-check-square-o mr-1"></i>全选
@@ -223,11 +234,53 @@
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化筛选器
+            initializeFilters();
             // 渲染武器选择列表
             renderWeaponSelection();
             // 绑定计算按钮事件
             document.getElementById('calculate-btn').addEventListener('click', calculateOptimalCombinations);
         });
+
+        // 初始化筛选器
+        function initializeFilters() {
+            // 获取所有唯一的属性值
+            const baseAttributes = [...new Set(weapons.map(w => w.baseAttribute))].sort();
+            const additionalAttributes = [...new Set(weapons.map(w => w.additionalAttribute))].sort();
+            const skillAttributes = [...new Set(weapons.map(w => w.skillAttribute))].sort();
+            
+            // 填充基础属性筛选器
+            const baseFilter = document.getElementById('base-attribute-filter');
+            baseAttributes.forEach(attr => {
+                const option = document.createElement('option');
+                option.value = attr;
+                option.textContent = attr;
+                baseFilter.appendChild(option);
+            });
+            
+            // 填充附加属性筛选器
+            const additionalFilter = document.getElementById('additional-attribute-filter');
+            additionalAttributes.forEach(attr => {
+                const option = document.createElement('option');
+                option.value = attr;
+                option.textContent = attr;
+                additionalFilter.appendChild(option);
+            });
+            
+            // 填充技能属性筛选器
+            const skillFilter = document.getElementById('skill-attribute-filter');
+            skillAttributes.forEach(attr => {
+                const option = document.createElement('option');
+                option.value = attr;
+                option.textContent = attr;
+                skillFilter.appendChild(option);
+            });
+            
+            // 绑定筛选器事件
+            baseFilter.addEventListener('change', renderWeaponSelection);
+            additionalFilter.addEventListener('change', renderWeaponSelection);
+            skillFilter.addEventListener('change', renderWeaponSelection);
+        }
 
         // 渲染武器选择列表
         function renderWeaponSelection() {
@@ -237,12 +290,18 @@
             // 获取筛选条件
             const rarityFilter = document.getElementById('rarity-filter').value;
             const typeFilter = document.getElementById('type-filter').value;
+            const baseAttributeFilter = document.getElementById('base-attribute-filter').value;
+            const additionalAttributeFilter = document.getElementById('additional-attribute-filter').value;
+            const skillAttributeFilter = document.getElementById('skill-attribute-filter').value;
             
             // 筛选武器
             const filteredWeapons = weapons.filter(weapon => {
                 const rarityMatch = rarityFilter === 'all' || weapon.rarity.toString() === rarityFilter;
                 const typeMatch = typeFilter === 'all' || weapon.type === typeFilter;
-                return rarityMatch && typeMatch;
+                const baseAttributeMatch = baseAttributeFilter === 'all' || weapon.baseAttribute === baseAttributeFilter;
+                const additionalAttributeMatch = additionalAttributeFilter === 'all' || weapon.additionalAttribute === additionalAttributeFilter;
+                const skillAttributeMatch = skillAttributeFilter === 'all' || weapon.skillAttribute === skillAttributeFilter;
+                return rarityMatch && typeMatch && baseAttributeMatch && additionalAttributeMatch && skillAttributeMatch;
             });
 
             filteredWeapons.forEach(weapon => {
@@ -290,11 +349,17 @@
                 // 获取当前筛选条件下的武器
                 const rarityFilter = document.getElementById('rarity-filter').value;
                 const typeFilter = document.getElementById('type-filter').value;
+                const baseAttributeFilter = document.getElementById('base-attribute-filter').value;
+                const additionalAttributeFilter = document.getElementById('additional-attribute-filter').value;
+                const skillAttributeFilter = document.getElementById('skill-attribute-filter').value;
                 
                 const filteredWeapons = weapons.filter(weapon => {
                     const rarityMatch = rarityFilter === 'all' || weapon.rarity.toString() === rarityFilter;
                     const typeMatch = typeFilter === 'all' || weapon.type === typeFilter;
-                    return rarityMatch && typeMatch;
+                    const baseAttributeMatch = baseAttributeFilter === 'all' || weapon.baseAttribute === baseAttributeFilter;
+                    const additionalAttributeMatch = additionalAttributeFilter === 'all' || weapon.additionalAttribute === additionalAttributeFilter;
+                    const skillAttributeMatch = skillAttributeFilter === 'all' || weapon.skillAttribute === skillAttributeFilter;
+                    return rarityMatch && typeMatch && baseAttributeMatch && additionalAttributeMatch && skillAttributeMatch;
                 });
                 
                 // 清空当前选择
