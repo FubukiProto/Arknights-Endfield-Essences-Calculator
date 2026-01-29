@@ -256,9 +256,20 @@
         // 初始化筛选器
         function initializeFilters() {
             // 获取所有唯一的属性值
-            const baseAttributes = [...new Set(weapons.map(w => w.baseAttribute))].sort();
-            const additionalAttributes = [...new Set(weapons.map(w => w.additionalAttribute))].sort();
-            const skillAttributes = [...new Set(weapons.map(w => w.skillAttribute))].sort();
+            const baseAttributes = [...new Set(weapons.map(w => w.baseAttribute))].sort((a, b) => {
+                const baseOrder = ['力量提升', '敏捷提升', '智识提升', '意志提升', '主能力提升'];
+                return baseOrder.indexOf(a) - baseOrder.indexOf(b);
+            });
+            
+            const additionalAttributes = [...new Set(weapons.map(w => w.additionalAttribute))].sort((a, b) => {
+                const additionalOrder = ['攻击提升', '物理伤害提升', '灼热伤害提升', '电磁伤害提升', '寒冷伤害提升', '自然伤害提升', '法术提升', '源石技艺强度提升', '暴击率提升', '终结技充能效率提升', '生命提升', '治疗效率提升'];
+                return additionalOrder.indexOf(a) - additionalOrder.indexOf(b);
+            });
+            
+            const skillAttributes = [...new Set(weapons.map(w => w.skillAttribute))].sort((a, b) => {
+                const skillOrder = ['附术', '流转', '夜幕', '残暴', '医疗', '迸发', '压制', '效益', '粉碎', '巧技', '切骨', '追袭', '昂扬'];
+                return skillOrder.indexOf(a) - skillOrder.indexOf(b);
+            });
             
             // 填充基础属性筛选器
             const baseFilter = document.getElementById('base-attribute-filter');
