@@ -622,21 +622,38 @@
                             isAttributeMatch(w.additionalAttribute, targetAttr.val) : 
                             isAttributeMatch(w.skillAttribute, targetAttr.val);
                     });
-                    const requiredBases = [...new Set(matchedInNode.map(w => w.baseAttribute))];
-                    const potentialBases = [...new Set(potentialInNode.map(w => w.baseAttribute))];
-                    let finalBases = [...requiredBases];
-                    potentialBases.forEach(pb => { if (finalBases.length < 3 && !finalBases.includes(pb)) finalBases.push(pb); });
+                    const baseScoreMap = new Map();
+                    matchedInNode.forEach(w => {
+                        const baseScore = (w.rarity === 6 ? 20 : 10) + (w.id === mainWeaponId ? 50 : 0);
+                        baseScoreMap.set(w.baseAttribute, (baseScoreMap.get(w.baseAttribute) || 0) + baseScore);
+                    });
+                    potentialInNode.forEach(w => {
+                        const baseScore = (w.rarity === 6 ? 5 : 2);
+                        baseScoreMap.set(w.baseAttribute, (baseScoreMap.get(w.baseAttribute) || 0) + baseScore);
+                    });
+
+                    const finalBases = Array.from(baseScoreMap.entries())
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)
+                        .map(([base]) => base);
+
                     let totalScore = 0;
-                    matchedInNode.forEach(w => { totalScore += (w.rarity === 6 ? 20 : 10); if(w.id === mainWeaponId) totalScore += 50; });
+                    const finalMatched = matchedInNode.filter(w => {
+                        if (!finalBases.includes(w.baseAttribute)) return false;
+                        totalScore += (w.rarity === 6 ? 20 : 10);
+                        if (w.id === mainWeaponId) totalScore += 50;
+                        return true;
+                    });
                     const finalPotentials = potentialInNode.filter(pw => {
-                        if (finalBases.includes(pw.baseAttribute)) { totalScore += (pw.rarity === 6 ? 5 : 2); return true; }
-                        return false;
+                        if (!finalBases.includes(pw.baseAttribute)) return false;
+                        totalScore += (pw.rarity === 6 ? 5 : 2);
+                        return true;
                     });
                     const displayBases = [...finalBases];
                     while (displayBases.length < 3) displayBases.push("其他属性择一");
                     allNodeResults.push({
                         nodeName: node.name, combination: { selectedBaseAttributes: displayBases, selectedAttribute: targetAttr.val, attributeType: targetAttr.type },
-                        score: totalScore, matchedWeapons: matchedInNode, potentialWeapons: finalPotentials
+                        score: totalScore, matchedWeapons: finalMatched, potentialWeapons: finalPotentials
                     });
                 });
             });
