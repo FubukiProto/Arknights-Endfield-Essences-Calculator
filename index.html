@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>终末地基质计算器</title>
+    <title id="page-title">终末地基质计算器</title>
     <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -51,16 +51,23 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+    <div class="fixed top-4 right-4 z-50">
+        <button id="lang-toggle" class="bg-white border border-gray-300 shadow-sm px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-50 transition-all flex items-center gap-2">
+            <i class="fa fa-globe"></i>
+            <span id="lang-text">切換至 簡體中文</span>
+        </button>
+    </div>
+
     <div class="container mx-auto px-4 py-8">
         <header class="mb-8">
             <div class="text-center mb-4">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">基质计算器</h1>
-                <p class="text-gray-600">选择目标武器，获取最优的淤积点和词条选择</p>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2" id="ui-title">基质计算器</h1>
+                <p class="text-gray-600" id="ui-subtitle">选择目标武器，获取最优的淤积点和词条选择</p>
             </div>
             <div class="max-w-md mx-auto">
-                <label for="main-weapon-select" class="block text-sm font-medium text-gray-700 mb-1">主刷武器（可选）</label>
+                <label for="main-weapon-select" class="block text-sm font-medium text-gray-700 mb-1" id="ui-main-label">主刷武器（可选）</label>
                 <select id="main-weapon-select" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="">-- 不指定主刷武器 --</option>
+                    <option value="" id="ui-main-default">-- 不指定主刷武器 --</option>
                 </select>
             </div>
         </header>
@@ -69,42 +76,34 @@
             <!-- 左侧面板：武器选择 -->
             <div class="w-full lg:w-1/3 bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold mb-4 flex items-center">
-                    <i class="fa fa-shield mr-2 text-primary"></i>武器选择
+                    <i class="fa fa-shield mr-2 text-primary"></i><span id="ui-weapon-sel">武器选择</span>
                 </h2>
                 <div class="mb-4">
                     <div class="flex gap-2">
                         <select id="rarity-filter" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="all">全部稀有度</option>
+                            <option value="all" id="ui-rarity-all">全部稀有度</option>
                             <option value="6">6星</option>
                             <option value="5">5星</option>
                         </select>
                         <select id="type-filter" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                            <option value="all">全部类型</option>
-                            <option value="单手剑">单手剑</option>
-                            <option value="双手剑">双手剑</option>
-                            <option value="长柄武器">长柄武器</option>
-                            <option value="手铳">手铳</option>
-                            <option value="施术单元">施术单元</option>
+                            <option value="all" id="ui-type-all">全部类型</option>
                         </select>
                     </div>
                 </div>
                 <div class="mb-4">
                     <select id="base-attribute-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary mb-2">
-                        <option value="all">全部基础属性</option>
                     </select>
                     <select id="additional-attribute-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary mb-2">
-                        <option value="all">全部附加属性</option>
                     </select>
                     <select id="skill-attribute-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
-                        <option value="all">全部技能属性</option>
                     </select>
                 </div>
                 <div class="mb-4 flex gap-2">
                     <button id="select-all-btn" class="w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-md text-sm transition-all">
-                        <i class="fa fa-check-square-o mr-1"></i>全选
+                        <i class="fa fa-check-square-o mr-1"></i><span id="ui-btn-all">全选</span>
                     </button>
                     <button id="clear-selection-btn" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-1 px-2 rounded-md text-sm transition-all">
-                        <i class="fa fa-times mr-1"></i>清空选择
+                        <i class="fa fa-times mr-1"></i><span id="ui-btn-clear">清空选择</span>
                     </button>
                 </div>
                 <div class="space-y-3 mb-6 max-h-96 overflow-y-auto p-2 border border-gray-200 rounded-md" id="weapon-selection">
@@ -112,19 +111,19 @@
                 </div>
 
                 <button id="calculate-btn" class="w-full bg-primary hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-all flex items-center justify-center">
-                    <i class="fa fa-calculator mr-2"></i>计算最优选择
+                    <i class="fa fa-calculator mr-2"></i><span id="ui-btn-calc">计算最优选择</span>
                 </button>
             </div>
 
             <!-- 右侧面板：结果展示 -->
             <div class="w-full lg:w-2/3 bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold mb-4 flex items-center">
-                    <i class="fa fa-star mr-2 text-primary"></i>最优词条选择
+                    <i class="fa fa-star mr-2 text-primary"></i><span id="ui-result-title">最优词条选择</span>
                 </h2>
                 
                 <div id="results-container" class="hidden">
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium mb-2">推荐策略</h3>
+                        <h3 class="text-lg font-medium mb-2" id="ui-strategy">推荐策略</h3>
                         <div class="grid grid-cols-1 gap-4" id="recommendations-container">
                             <!-- 推荐策略卡片将通过JavaScript动态生成 -->
                         </div>
@@ -137,13 +136,113 @@
 
                 <div id="empty-results" class="text-center py-12">
                     <i class="fa fa-info-circle text-4xl text-gray-400 mb-4"></i>
-                    <p class="text-gray-500">请选择武器，然后点击“计算最优选择”</p>
+                    <p class="text-gray-500" id="ui-empty-msg">请选择武器，然后点击“计算最优选择”</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- 語言字典與轉換邏輯 ---
+        function detectLanguage() {
+            // 1. 檢查 URL 參數 (?lang=zh-CN 或 ?lang=zh-TW)
+            const urlParams = new URLSearchParams(window.location.search);
+            const langParam = urlParams.get('lang');
+            if (langParam === 'zh-CN' || langParam === 'zh-TW') {
+                return langParam;
+            }
+
+            // 2. 檢查 LocalStorage (使用者上次的手動選擇)
+            const savedLang = localStorage.getItem('preferredLang');
+            if (savedLang) {
+                return savedLang;
+            }
+
+            // 3. 檢查瀏覽器語言 (navigator.language)
+            const browserLang = navigator.language || navigator.userLanguage;
+            if (browserLang.toLowerCase().includes('zh-cn') || 
+                browserLang.toLowerCase().includes('zh-sg') || 
+                browserLang.toLowerCase().includes('zh-my')) {
+                return 'zh-CN';
+            } else if (browserLang.toLowerCase().includes('zh-tw')) {
+                return 'zh-TW';
+            }
+
+            return 'zh-CN';
+        }
+
+        // 初始化語言設定
+        currentLang = detectLanguage();
+        const i18n = {
+            'zh-TW': {
+                '终末地基质计算器': '終末地基質計算器',
+                '基质计算器': '基質計算器',
+                '选择目标武器，获取最优的淤积点和词条选择': '選擇目標武器，獲取最優的淤積點和詞條選擇',
+                '主刷武器（可选）': '主刷武器（可選）',
+                '-- 不指定主刷武器 --': '-- 不指定主刷武器 --',
+                '武器选择': '武器選擇',
+                '全部稀有度': '全部稀有度',
+                '全部类型': '全部類型',
+                '全部基础属性': '全部基礎屬性',
+                '全部附加属性': '全部附加屬性',
+                '全部技能属性': '全部技能屬性',
+                '全选': '全選',
+                '清空选择': '清空選擇',
+                '计算最优选择': '計算最優選擇',
+                '最优词条选择': '最優詞條選擇',
+                '推荐策略': '推薦策略',
+                '请选择武器，然后点击“计算最优选择”': '請選擇武器，然後點擊「計算最優選擇」',
+                '请至少选择一件武器': '請至少選擇一件武器',
+                // 武器名稱
+                '宏愿': '宏願', '不知归': '不知歸', '熔铸火焰': '熔鑄火焰', '扶摇': '扶搖', '热熔切割器': '熱熔切割器', 
+                '显赫声名': '顯赫聲名', '典范': '典範', '负山': '負山', '骁勇': '驍勇', '艺术暴君': '藝術暴君', 
+                '领航者': '領航者', '同类相食': '同類相食', '使命必达': '使命必達', '沧溟星梦': '滄溟星夢', 
+                '作品：蚀迹': '作品：蝕跡', '爆破单元': '爆破單元', '遗忘': '遺忘', '骑士精神': '騎士精神', 
+                '钢铁余音': '鋼鐵餘音', '坚城铸造者': '堅城鑄造者', '逐鳞3.0': '逐鱗3.0', '十二问': '十二問', 
+                'O.B.J.轻芒': 'O.B.J.輕芒', '探骊': '探驪', '终点之声': '終點之聲', '嵌合正义': '嵌合正義', 
+                '作品：众生': '作品：眾生', 'O.B.J.迅极': 'O.B.J.迅極', '理性告别': '理性告別', '悼亡诗': '悼亡詩', 
+                '莫奈何': '莫奈何', 'O.B.J.术识': 'O.B.J.術識',
+                // 類型
+                '单手剑': '單手劍', '双手剑': '雙手劍', '长柄武器': '長柄武器', '手铳': '手銃', '施术单元': '施術單元',
+                // 屬性
+                '提升': '提升',
+                '敏捷提升': '敏捷提升', '力量提升': '力量提升', '意志提升': '意志提升', '智识提升': '智識提升', '主能力提升': '主能力提升',
+                '攻击提升': '攻擊提升', '物理伤害提升': '物理傷害提升', '灼热伤害提升': '灼熱傷害提升', '电磁伤害提升': '電磁傷害提升', 
+                '寒冷伤害提升': '寒冷傷害提升', '自然伤害提升': '自然傷害提升', '法术提升': '法術提升', '源石技艺强度提升': '源石技藝強度提升', 
+                '暴击率提升': '暴擊率提升', '终结技充能效率提升': '終結技蓄能效率提升', '生命提升': '生命提升', '治疗效率提升': '治療效率提升',
+                '源石技艺提升': '源石技藝提升', '终结技效率提升': '終結技效率提升', '法术伤害提升': '法術傷害提升',
+                // 技能
+                '附术': '附術', '流转': '流轉', '夜幕': '夜幕', '残暴': '殘暴', '医疗': '醫療', '迸发': '迸發', '压制': '壓制', 
+                '效益': '效益', '粉碎': '粉碎', '巧技': '巧技', '切骨': '切骨', '追袭': '追襲', '昂扬': '昂揚', '强攻': '強攻',
+                // 地點
+                '枢纽区': '樞紐區', '源石研究园': '源石研究園', '矿脉源区': '礦脈源區', '供能高地': '供能高地', '武陵城': '武陵城',
+                // 其他 UI 文字
+                '其他属性择一': '其他屬性擇一', '附加': '附加', '技能': '技能', '模板': '模板', '核心': '核心', '词条': '詞條',
+                '建议基础属性': '建議基礎屬性', '权重分': '權重分', '产出属性组合清单': '產出屬性組合清單', '基础': '基礎', '星': '星'
+            }
+        };
+
+        function t(text) {
+            if (currentLang === 'zh-CN') return text;
+            return i18n['zh-TW'][text] || text;
+        }
+
+        function updateStaticUI() {
+            document.getElementById('page-title').innerText = t('终末地基质计算器');
+            document.getElementById('ui-title').innerText = t('基质计算器');
+            document.getElementById('ui-subtitle').innerText = t('选择目标武器，获取最优的淤积点和词条选择');
+            document.getElementById('ui-main-label').innerText = t('主刷武器（可选）');
+            document.getElementById('ui-weapon-sel').innerText = t('武器选择');
+            document.getElementById('ui-rarity-all').innerText = t('全部稀有度');
+            document.getElementById('ui-btn-all').innerText = t('全选');
+            document.getElementById('ui-btn-clear').innerText = t('清空选择');
+            document.getElementById('ui-btn-calc').innerText = t('计算最优选择');
+            document.getElementById('ui-result-title').innerText = t('最优词条选择');
+            document.getElementById('ui-strategy').innerText = t('推荐策略');
+            document.getElementById('ui-empty-msg').innerText = t('请选择武器，然后点击“计算最优选择”');
+            document.getElementById('lang-text').innerText = currentLang === 'zh-TW' ? '切換至 簡體中文' : '切換至 繁體中文';
+        }
+
         // 武器数据
         const weapons = [
             { id: 1, name: "宏愿", rarity: 6, type: "单手剑", baseAttribute: "敏捷提升", additionalAttribute: "攻击提升", skillAttribute: "附术" },
@@ -239,6 +338,8 @@
         let selectedWeaponIds = [];
         // 计算结果
         let calculationResults = [];
+        // 当前选中的主刷武器ID
+        let mainWeaponId = null;
 
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
@@ -248,10 +349,24 @@
             renderWeaponSelection();
             // 绑定计算按钮事件
             document.getElementById('calculate-btn').addEventListener('click', calculateOptimalCombinations);
-        });
+            updateStaticUI();
+            document.getElementById('lang-toggle').addEventListener('click', function() {
+                currentLang = currentLang === 'zh-TW' ? 'zh-CN' : 'zh-TW';
 
-        // 当前选中的主刷武器ID
-        let mainWeaponId = null;
+                // 儲存選擇到 LocalStorage
+                localStorage.setItem('preferredLang', currentLang);
+        
+                // 更新 URL 參數 (但不重新整理頁面，方便使用者分享)
+                const url = new URL(window.location);
+                url.searchParams.set('lang', currentLang);
+                window.history.replaceState({}, '', url);
+
+                updateStaticUI();
+                initializeFilters();
+                renderWeaponSelection();
+                if (calculationResults.length > 0) displayResults();
+            });
+        });
 
         // 初始化筛选器
         function initializeFilters() {
@@ -270,34 +385,51 @@
                 const skillOrder = ['附术', '流转', '夜幕', '残暴', '医疗', '迸发', '压制', '效益', '粉碎', '巧技', '切骨', '追袭', '昂扬'];
                 return skillOrder.indexOf(a) - skillOrder.indexOf(b);
             });
-            
+
+            const types = [...new Set(weapons.map(w => w.type))].sort((a, b) => {
+                const typeOrder = ['单手剑', '双手剑', '长柄武器', '手铳', '施术单元'];
+                return typeOrder.indexOf(a) - typeOrder.indexOf(b);
+            });
+
+            const typeFilter = document.getElementById('type-filter');
+            typeFilter.innerHTML = `<option value="all">${t('全部类型')}</option>`;
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = t(type);
+                typeFilter.appendChild(option);
+            });
+
             // 填充基础属性筛选器
             const baseFilter = document.getElementById('base-attribute-filter');
+            baseFilter.innerHTML = `<option value="all">${t('全部基础属性')}</option>`;
             baseAttributes.forEach(attr => {
                 const option = document.createElement('option');
                 option.value = attr;
-                option.textContent = attr;
+                option.textContent = t(attr);
                 baseFilter.appendChild(option);
             });
-            
+
             // 填充附加属性筛选器
             const additionalFilter = document.getElementById('additional-attribute-filter');
+            additionalFilter.innerHTML = `<option value="all">${t('全部附加属性')}</option>`;
             additionalAttributes.forEach(attr => {
                 const option = document.createElement('option');
                 option.value = attr;
-                option.textContent = attr;
+                option.textContent = t(attr);
                 additionalFilter.appendChild(option);
             });
-            
+
             // 填充技能属性筛选器
             const skillFilter = document.getElementById('skill-attribute-filter');
+            skillFilter.innerHTML = `<option value="all">${t('全部技能属性')}</option>`;
             skillAttributes.forEach(attr => {
                 const option = document.createElement('option');
                 option.value = attr;
-                option.textContent = attr;
+                option.textContent = t(attr);
                 skillFilter.appendChild(option);
             });
-            
+
             // 绑定筛选器事件
             baseFilter.addEventListener('change', renderWeaponSelection);
             additionalFilter.addEventListener('change', renderWeaponSelection);
@@ -315,12 +447,15 @@
             const sortedWeapons = [...weapons];
             
             // 填充主刷武器选择器
+            const savedMainVal = mainWeaponSelect.value;
+            mainWeaponSelect.innerHTML = `<option value="">${t('-- 不指定主刷武器 --')}</option>`;
             sortedWeapons.forEach(weapon => {
                 const option = document.createElement('option');
                 option.value = weapon.id;
-                option.textContent = `${weapon.name} (${weapon.rarity}星 ${weapon.type})`;
+                option.textContent = `${t(weapon.name)} (${weapon.rarity}${t('星')} ${t(weapon.type)})`;
                 mainWeaponSelect.appendChild(option);
             });
+            mainWeaponSelect.value = savedMainVal;
             
             // 绑定主刷武器选择事件
             mainWeaponSelect.addEventListener('change', function() {
@@ -363,7 +498,7 @@
             filteredWeapons.forEach(weapon => {
                 const weaponCard = document.createElement('div');
                 weaponCard.className = 'flex items-center p-3 border rounded-md shadow-hover';
-                
+
                 // 检查武器是否已选中
                 const isChecked = selectedWeaponIds.includes(weapon.id) ? 'checked' : '';
                 
@@ -371,11 +506,11 @@
                     <input type="checkbox" id="weapon-${weapon.id}" class="weapon-checkbox mr-3 h-5 w-5 text-primary focus:ring-primary" value="${weapon.id}" ${isChecked}>
                     <label for="weapon-${weapon.id}" class="flex-1 cursor-pointer">
                         <div class="font-medium flex items-center">
-                            ${weapon.name}
-                            <span class="ml-2 text-xs px-2 py-0.5 ${weapon.rarity === 6 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'} rounded-full">${weapon.rarity}星</span>
-                            <span class="ml-2 text-xs px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full">${weapon.type}</span>
+                            ${t(weapon.name)}
+                            <span class="ml-2 text-xs px-2 py-0.5 ${weapon.rarity === 6 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'} rounded-full">${weapon.rarity}${t('星')}</span>
+                            <span class="ml-2 text-xs px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full">${t(weapon.type)}</span>
                         </div>
-                        <div class="text-sm text-gray-500">${weapon.baseAttribute} / ${weapon.additionalAttribute} / ${weapon.skillAttribute}</div>
+                        <div class="text-sm text-gray-500">${t(weapon.baseAttribute)} / ${t(weapon.additionalAttribute)} / ${t(weapon.skillAttribute)}</div>
                     </label>
                 `;
                 container.appendChild(weaponCard);
@@ -391,7 +526,7 @@
                 });
             });
         }
-        
+
         // 绑定筛选和选择控制事件
         document.addEventListener('DOMContentLoaded', function() {
             // 绑定稀有度筛选事件
@@ -445,101 +580,66 @@
         function calculateOptimalCombinations() {
             // 检查是否选择了武器
             if (selectedWeaponIds.length === 0) {
-                alert('请至少选择一件武器');
+                alert(t('请至少选择一件武器'));
                 return;
             }
 
             // 获取选中的武器
             const selectedWeapons = weapons.filter(weapon => selectedWeaponIds.includes(weapon.id));
-            
+
             // 存储所有淤积点的计算结果
             let allNodeResults = [];
-            
+
             // 遍历所有淤积点，计算每个淤积点的最优组合
             nodes.forEach(node => {
-                // 生成当前淤积点的所有可能属性组合
-                const allCombinations = generateAllPossibleCombinations(node);
-                
-                // 计算每个组合的得分
-                const nodeResults = [];
-                allCombinations.forEach(combination => {
-                    let score = 0;
-                    const matchedWeapons = [];
-
-                    selectedWeapons.forEach(weapon => {
-                        if (isWeaponMatch(weapon, combination, node)) {
-                            score++;
-                            matchedWeapons.push(weapon);
-                        }
+                const nodeBases = node.availableBaseAttributes;
+                const nodeAdditions = node.availableAdditionalAttributes;
+                const nodeSkills = node.availableSkillAttributes;
+                const allAttrs = [
+                    ...nodeAdditions.map(a => ({ val: a, type: 'additional' })),
+                    ...nodeSkills.map(s => ({ val: s, type: 'skill' }))
+                ];
+                allAttrs.forEach(targetAttr => {
+                    const matchedInNode = selectedWeapons.filter(w => {
+                        const canBaseDrop = nodeBases.includes(w.baseAttribute);
+                        const canAdditionDrop = nodeAdditions.some(a => isAttributeMatch(w.additionalAttribute, a));
+                        const canSkillDrop = nodeSkills.some(s => isAttributeMatch(w.skillAttribute, s));
+                        if (!(canBaseDrop && canAdditionDrop && canSkillDrop)) return false;
+                        return targetAttr.type === 'additional' ? 
+                            isAttributeMatch(w.additionalAttribute, targetAttr.val) : 
+                            isAttributeMatch(w.skillAttribute, targetAttr.val);
                     });
-
-                    if (score > 0) {
-                        nodeResults.push({
-                            nodeId: node.id,
-                            nodeName: node.name,
-                            combination,
-                            score,
-                            matchedWeapons
-                        });
-                    }
+                    if (matchedInNode.length === 0) return;
+                    const potentialInNode = weapons.filter(w => {
+                        if (selectedWeaponIds.includes(w.id)) return false;
+                        const canBaseDrop = nodeBases.includes(w.baseAttribute);
+                        const canAdditionDrop = nodeAdditions.some(a => isAttributeMatch(w.additionalAttribute, a));
+                        const canSkillDrop = nodeSkills.some(s => isAttributeMatch(w.skillAttribute, s));
+                        if (!(canBaseDrop && canAdditionDrop && canSkillDrop)) return false;
+                        return targetAttr.type === 'additional' ? 
+                            isAttributeMatch(w.additionalAttribute, targetAttr.val) : 
+                            isAttributeMatch(w.skillAttribute, targetAttr.val);
+                    });
+                    const requiredBases = [...new Set(matchedInNode.map(w => w.baseAttribute))];
+                    const potentialBases = [...new Set(potentialInNode.map(w => w.baseAttribute))];
+                    let finalBases = [...requiredBases];
+                    potentialBases.forEach(pb => { if (finalBases.length < 3 && !finalBases.includes(pb)) finalBases.push(pb); });
+                    let totalScore = 0;
+                    matchedInNode.forEach(w => { totalScore += (w.rarity === 6 ? 20 : 10); if(w.id === mainWeaponId) totalScore += 50; });
+                    const finalPotentials = potentialInNode.filter(pw => {
+                        if (finalBases.includes(pw.baseAttribute)) { totalScore += (pw.rarity === 6 ? 5 : 2); return true; }
+                        return false;
+                    });
+                    const displayBases = [...finalBases];
+                    while (displayBases.length < 3) displayBases.push("其他属性择一");
+                    allNodeResults.push({
+                        nodeName: node.name, combination: { selectedBaseAttributes: displayBases, selectedAttribute: targetAttr.val, attributeType: targetAttr.type },
+                        score: totalScore, matchedWeapons: matchedInNode, potentialWeapons: finalPotentials
+                    });
                 });
-                
-                // 将当前淤积点的结果添加到总结果中
-                allNodeResults = allNodeResults.concat(nodeResults);
             });
-
-            // 如果指定了主刷武器，只保留包含该武器的组合
-            let filteredResults = allNodeResults;
-            if (mainWeaponId) {
-                filteredResults = allNodeResults.filter(result => 
-                    result.matchedWeapons.some(weapon => weapon.id === mainWeaponId)
-                );
-            }
-            
-            // 按得分降序排序并取前10个
-            calculationResults = filteredResults
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10);
-
-            // 显示结果
+            calculationResults = allNodeResults.sort((a, b) => b.score - a.score).slice(0, 10);
             displayResults();
-        }
-
-        // 生成所有可能的属性组合
-        function generateAllPossibleCombinations(node) {
-            const combinations = [];
-            const baseAttributes = node.availableBaseAttributes;
-            const additionalAttributes = node.availableAdditionalAttributes;
-            const skillAttributes = node.availableSkillAttributes;
-            
-            // 生成所有可能的3个基础属性组合
-            for (let i = 0; i < baseAttributes.length; i++) {
-                for (let j = i + 1; j < baseAttributes.length; j++) {
-                    for (let k = j + 1; k < baseAttributes.length; k++) {
-                        const selectedBases = [baseAttributes[i], baseAttributes[j], baseAttributes[k]];
-                        
-                        // 生成选择附加属性的组合
-                        additionalAttributes.forEach(attr => {
-                            combinations.push({
-                                selectedBaseAttributes: selectedBases,
-                                selectedAttribute: attr,
-                                attributeType: "additional"
-                            });
-                        });
-                        
-                        // 生成选择技能属性的组合
-                        skillAttributes.forEach(attr => {
-                            combinations.push({
-                                selectedBaseAttributes: selectedBases,
-                                selectedAttribute: attr,
-                                attributeType: "skill"
-                            });
-                        });
-                    }
-                }
-            }
-            
-            return combinations;
         }
 
         // 属性名称映射，处理不完全匹配的情况
@@ -561,35 +661,6 @@
             return normalizedWeaponAttr === normalizedNodeAttr;
         }
 
-        // 检查武器是否与属性组合匹配
-        function isWeaponMatch(weapon, combination, node) {
-            // 检查武器的基础属性是否在用户选择的3个基础属性中
-            const baseMatch = combination.selectedBaseAttributes.includes(weapon.baseAttribute);
-            
-            // 检查武器的附加属性和技能属性是否与用户选择的特定属性匹配
-            let attributeMatch = false;
-            if (combination.attributeType === "additional") {
-                attributeMatch = isAttributeMatch(weapon.additionalAttribute, combination.selectedAttribute);
-            } else {
-                attributeMatch = isAttributeMatch(weapon.skillAttribute, combination.selectedAttribute);
-            }
-            
-            // 检查剩余属性是否在淤积点的可用属性中
-            let remainingMatch = false;
-            if (combination.attributeType === "additional") {
-                remainingMatch = node.availableSkillAttributes.some(attr => 
-                    isAttributeMatch(weapon.skillAttribute, attr)
-                );
-            } else {
-                remainingMatch = node.availableAdditionalAttributes.some(attr => 
-                    isAttributeMatch(weapon.additionalAttribute, attr)
-                );
-            }
-            
-            // 只有当所有条件都满足时，该组合才能刷取该武器
-            return baseMatch && attributeMatch && remainingMatch;
-        }
-
         // 显示计算结果
         function displayResults() {
             // 隐藏空结果提示
@@ -601,102 +672,63 @@
             renderRecommendationsCards();
         }
 
+        function renderWeaponSpan(w) {
+            const colorClass = w.rarity === 6 ? 'text-red-600' : 'text-yellow-600';
+            const tooltip = `${t('基础')}: ${t(w.baseAttribute)}\n${t('附加')}: ${t(w.additionalAttribute)}\n${t('技能')}: ${t(w.skillAttribute)}`;
+            return `<span class="text-xs bg-white px-2.5 py-1 rounded border border-gray-200 font-bold cursor-help ${colorClass} shadow-sm" title="${tooltip}">${t(w.name)}</span>`;
+        }
+
         // 渲染推荐策略卡片
         function renderRecommendationsCards() {
             const container = document.getElementById('recommendations-container');
             container.innerHTML = '';
-
-            calculationResults.forEach((result, index) => {
+            calculationResults.forEach(result => {
                 const card = document.createElement('div');
-                card.className = 'bg-white border rounded-lg shadow-sm hover:shadow-md transition-all p-4';
-                
-                // 格式化特定属性显示
-                const attributeTypeText = result.combination.attributeType === 'additional' ? '附加' : '技能';
-                
-                // 获取覆盖武器的名称列表
-                const weaponNames = result.matchedWeapons.map(w => w.name).join(', ');
-                
-                // 简化基础词条显示
-                const simplifiedBaseAttributes = result.combination.selectedBaseAttributes.map(attr => {
-                    return attr.replace('提升', '');
-                }).join(', ');
-                
+                card.className = 'bg-white border-2 border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all p-5 mb-6';
+                const attrType = result.combination.attributeType === 'additional' ? t('附加') : t('技能');
+                const baseHtml = result.combination.selectedBaseAttributes.map(attr => {
+                    if (attr === "其他属性择一") return `<span class="text-gray-400 italic font-normal">${t(attr)}</span>`;
+                    return `<span class="text-blue-700 font-bold">${t(attr).replace(t('提升'), '')}</span>`;
+                }).join('<span class="text-gray-300 mx-2">/</span>');
+
+                const comboMap = new Map();
+                [...result.matchedWeapons, ...result.potentialWeapons].forEach(w => {
+                    const key = `${w.baseAttribute}|${w.additionalAttribute}|${w.skillAttribute}`;
+                    if (!comboMap.has(key)) comboMap.set(key, { base: w.baseAttribute, addition: w.additionalAttribute, skill: w.skillAttribute, weapons: [] });
+                    if (!comboMap.get(key).weapons.find(ex => ex.id === w.id)) comboMap.get(key).weapons.push(w);
+                });
+
+                const combosHtml = Array.from(comboMap.values()).map(item => `
+                    <div class="bg-slate-50/80 rounded-lg p-3 border border-slate-100 mb-3 last:mb-0">
+                        <div class="flex items-center gap-2 text-xs mb-2 pb-1.5 border-b border-slate-200">
+                            <span class="bg-slate-500 text-white px-1.5 py-0.5 rounded-sm font-bold scale-90">${t('模板')}</span>
+                            <span class="text-slate-600 font-bold">${t(item.base).replace(t('提升'), '')}/${t(getNormalizedAttributeName(item.addition))}/${t(item.skill)}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2">${item.weapons.sort((a,b)=>b.rarity-a.rarity).map(w=>renderWeaponSpan(w)).join('')}</div>
+                    </div>`).join('');
+
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="font-bold text-lg text-primary">#${index + 1}</div>
-                        <div class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                            ${result.score} 把武器
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-slate-800 text-white text-sm px-3 py-1 rounded-full font-bold shadow-sm">${t(result.nodeName)}</span>
+                        <span class="text-xs text-gray-400 font-medium">${t('权重分')}: ${result.score}</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                        <div class="bg-blue-50/40 p-3 rounded-lg border border-blue-100">
+                            <p class="text-xs text-blue-500 font-bold mb-1.5 flex items-center gap-1"><i class="fa fa-info-circle"></i> ${t('建议基础属性')}</p>
+                            <div class="text-sm font-medium tracking-wide">${baseHtml}</div>
+                        </div>
+                        <div class="bg-green-50/40 p-3 rounded-lg border border-green-100">
+                            <p class="text-xs text-green-600 font-bold mb-1.5 flex items-center gap-1"><i class="fa fa-crosshairs"></i> ${t('核心')}${attrType}${t('词条')}</p>
+                            <p class="text-sm font-bold text-green-700 tracking-wide">${t(getNormalizedAttributeName(result.combination.selectedAttribute))}</p>
                         </div>
                     </div>
-                    <h4 class="text-md font-semibold mb-2">${result.nodeName}</h4>
-                    <div class="space-y-2 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">基础属性:</span>
-                            <span class="text-gray-600">${simplifiedBaseAttributes}</span>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">${attributeTypeText}属性:</span>
-                            <span class="text-gray-600">${result.combination.selectedAttribute}</span>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-gray-100">
-                        <div class="text-xs text-gray-500">
-                            <span class="font-medium">覆盖武器:</span> ${result.matchedWeapons.map(w => `<span class="${w.rarity === 6 ? 'text-red-600' : 'text-yellow-600'}">${w.name}</span>`).join(', ')}
-                        </div>
-                    </div>
-                `;
-                
+                    <div class="mt-4">
+                        <p class="text-xs text-gray-500 font-bold mb-3 uppercase tracking-wider flex items-center gap-1"><i class="fa fa-layer-group"></i> ${t('产出属性组合清单')}</p>
+                        <div class="space-y-3">${combosHtml}</div>
+                    </div>`;
                 container.appendChild(card);
             });
         }
-
-        // 渲染推荐策略表格（备用）
-        function renderRecommendationsTable() {
-            const tableBody = document.getElementById('recommendations-table');
-            tableBody.innerHTML = '';
-
-            calculationResults.forEach((result, index) => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                
-                // 格式化特定属性显示
-                const attributeTypeText = result.combination.attributeType === 'additional' ? '附加' : '技能';
-                const attributeText = `${result.combination.selectedAttribute} (${attributeTypeText})`;
-                
-                // 获取覆盖武器的名称列表
-                const weaponNames = result.matchedWeapons.map(w => w.name).join(', ');
-                
-                // 简化基础词条显示
-                const simplifiedBaseAttributes = result.combination.selectedBaseAttributes.map(attr => {
-                    return attr.replace('提升', '');
-                }).join(', ');
-                
-                row.innerHTML = `
-                    <td class="py-2 px-4 border-b border-gray-200">${index + 1}</td>
-                    <td class="py-2 px-4 border-b border-gray-200 font-medium">${result.nodeName}</td>
-                    <td class="py-2 px-4 border-b border-gray-200">${simplifiedBaseAttributes}</td>
-                    <td class="py-2 px-4 border-b border-gray-200">${result.combination.selectedAttribute}</td>
-                `;
-                
-                // 添加覆盖武器信息行
-                const weaponRow = document.createElement('tr');
-                weaponRow.className = 'bg-gray-50';
-                weaponRow.innerHTML = `
-                    <td colspan="4" class="py-1 px-4 text-xs text-gray-600">
-                        <i class="fa fa-info-circle mr-1"></i>覆盖武器: ${weaponNames}
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-                tableBody.appendChild(weaponRow);
-            });
-
-
-        }
-
-
-
-
     </script>
 </body>
 </html>
