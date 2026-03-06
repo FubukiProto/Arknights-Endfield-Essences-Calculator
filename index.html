@@ -430,10 +430,10 @@
                 skillFilter.appendChild(option);
             });
 
-            // 绑定筛选器事件
-            baseFilter.addEventListener('change', renderWeaponSelection);
-            additionalFilter.addEventListener('change', renderWeaponSelection);
-            skillFilter.addEventListener('change', renderWeaponSelection);
+            // 绑定筛选器事件（使用 onchange 避免重复初始化导致重复绑定）
+            baseFilter.onchange = renderWeaponSelection;
+            additionalFilter.onchange = renderWeaponSelection;
+            skillFilter.onchange = renderWeaponSelection;
             
             // 初始化主刷武器选择器
             initializeMainWeaponSelector();
@@ -457,8 +457,8 @@
             });
             mainWeaponSelect.value = savedMainVal;
             
-            // 绑定主刷武器选择事件
-            mainWeaponSelect.addEventListener('change', function() {
+            // 绑定主刷武器选择事件（使用 onchange 避免重复初始化导致重复绑定）
+            mainWeaponSelect.onchange = function() {
                 mainWeaponId = this.value ? parseInt(this.value) : null;
                 
                 // 如果选择了主刷武器，自动在下方选择对应的武器
@@ -470,7 +470,7 @@
                         renderWeaponSelection();
                     }
                 }
-            });
+            };
         }
 
         // 渲染武器选择列表
@@ -568,6 +568,8 @@
             document.getElementById('clear-selection-btn').addEventListener('click', function() {
                 // 清空当前选择
                 selectedWeaponIds = [];
+                mainWeaponId = null;
+                document.getElementById('main-weapon-select').value = '';
                 
                 // 重新渲染武器选择列表
                 renderWeaponSelection();
