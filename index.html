@@ -172,7 +172,7 @@
         }
 
         // 初始化語言設定
-        currentLang = detectLanguage();
+        let currentLang = detectLanguage();
         const i18n = {
             'zh-TW': {
                 '终末地基质计算器': '終末地基質計算器',
@@ -193,6 +193,7 @@
                 '推荐策略': '推薦策略',
                 '请选择武器，然后点击“计算最优选择”': '請選擇武器，然後點擊「計算最優選擇」',
                 '请至少选择一件武器': '請至少選擇一件武器',
+                '没有找到匹配所选武器的刷取方案': '沒有找到符合所選武器的刷取方案',
                 // 武器名稱
                 '宏愿': '宏願', '不知归': '不知歸', '熔铸火焰': '熔鑄火焰', '黯色火炬': '黯色火炬', '扶摇': '扶搖', '热熔切割器': '熱熔切割器',
                 '显赫声名': '顯赫聲名', '白夜新星': '白夜新星', '大雷斑': '大雷斑', '赫拉芬格': '赫拉芬格', '典范': '典範', '昔日精品': '昔日精品', '破碎君王': '破碎君王', '负山': '負山', '骁勇': '驍勇', 'J.E.T.': 'J.E.T.', '艺术暴君': '藝術暴君',
@@ -224,9 +225,9 @@
                 '枢纽区': '樞紐區', '源石研究园': '源石研究園', '矿脉源区': '礦脈源區', '供能高地': '供能高地', '武陵城': '武陵城', 
                 '清波寨': '清波寨', 
                 '首敦': '首敦', '试验园区': '試驗園區',
-                '藏剑谷': '藏劍谷', '应龙关': '應龍關', '北部禁区': '北部禁區', '雪松林': '雪松林',
+                '藏剑谷': '藏劍谷', '应龙关': '應龍關', '北部禁区': '北部禁區', '雪松林': '雪松林', '祀的画': '祀的畫',
                 // 其他 UI 文字
-                '其他属性择一': '其他屬性擇一', '附加': '附加', '技能': '技能', '模板': '模板', '核心': '核心', '词条': '詞條',
+                '附加': '附加', '技能': '技能', '模板': '模板', '核心': '核心', '词条': '詞條',
                 '建议基础属性': '建議基礎屬性', '权重分': '權重分', '产出属性组合清单': '產出屬性組合清單', '基础': '基礎', '星': '星',
                 '已选可刷': '已選可刷', '总可刷': '總可刷', '已选择': '已選擇'
             }
@@ -238,6 +239,7 @@
         }
 
         function updateStaticUI() {
+            document.documentElement.lang = currentLang;
             document.getElementById('page-title').innerText = t('终末地基质计算器');
             document.getElementById('ui-title').innerText = t('基质计算器');
             document.getElementById('ui-subtitle').innerText = t('选择目标武器，获取最优的淤积点和词条选择');
@@ -249,7 +251,6 @@
             document.getElementById('ui-btn-calc').innerText = t('计算最优选择');
             document.getElementById('ui-result-title').innerText = t('最优词条选择');
             document.getElementById('ui-strategy').innerText = t('推荐策略');
-            document.getElementById('ui-empty-msg').innerText = t('请选择武器，然后点击“计算最优选择”');
             document.getElementById('lang-text').innerText = currentLang === 'zh-TW' ? '切換至 簡體中文' : '切換至 繁體中文';
         }
 
@@ -414,13 +415,20 @@
                 availableBaseAttributes: ["敏捷提升", "力量提升", "意志提升", "智识提升", "主能力提升"],
                 availableAdditionalAttributes: ["攻击提升", "生命提升", "灼热伤害提升", "电磁伤害提升", "暴击率提升", "终结技效率提升", "法术伤害提升", "治疗效率提升"],
                 availableSkillAttributes: ["强攻", "粉碎", "昂扬", "残暴", "医疗", "迸发", "夜幕", "流转"]
+            },
+            {
+                id: 13,
+                name: "祀的画",
+                availableBaseAttributes: ["敏捷提升", "力量提升", "意志提升", "智识提升", "主能力提升"],
+                availableAdditionalAttributes: ["攻击提升", "物理伤害提升", "灼热伤害提升", "寒冷伤害提升", "自然伤害提升", "源石技艺提升", "暴击率提升", "终结技效率提升"],
+                availableSkillAttributes: ["压制", "追袭", "巧技", "附术", "切骨", "迸发", "流转", "效益"]
             }
         ];
 
         // 当前选中的武器ID列表
         let selectedWeaponIds = [];
         // 计算结果
-        let calculationResults = [];
+        let calculationResults = null;
         // 当前选中的主刷武器ID
         let mainWeaponId = null;
 
@@ -433,6 +441,7 @@
             // 绑定计算按钮事件
             document.getElementById('calculate-btn').addEventListener('click', calculateOptimalCombinations);
             updateStaticUI();
+            displayResults();
             document.getElementById('lang-toggle').addEventListener('click', function() {
                 currentLang = currentLang === 'zh-TW' ? 'zh-CN' : 'zh-TW';
 
@@ -447,7 +456,7 @@
                 updateStaticUI();
                 initializeFilters();
                 renderWeaponSelection();
-                if (calculationResults.length > 0) displayResults();
+                displayResults();
             });
         });
 
@@ -475,6 +484,7 @@
             });
 
             const typeFilter = document.getElementById('type-filter');
+            const savedType = typeFilter.value;
             typeFilter.innerHTML = `<option value="all">${t('全部类型')}</option>`;
             types.forEach(type => {
                 const option = document.createElement('option');
@@ -482,9 +492,11 @@
                 option.textContent = t(type);
                 typeFilter.appendChild(option);
             });
+            typeFilter.value = types.includes(savedType) ? savedType : 'all';
 
             // 填充基础属性筛选器
             const baseFilter = document.getElementById('base-attribute-filter');
+            const savedBase = baseFilter.value;
             baseFilter.innerHTML = `<option value="all">${t('全部基础属性')}</option>`;
             baseAttributes.forEach(attr => {
                 const option = document.createElement('option');
@@ -492,9 +504,11 @@
                 option.textContent = t(attr);
                 baseFilter.appendChild(option);
             });
+            baseFilter.value = baseAttributes.includes(savedBase) ? savedBase : 'all';
 
             // 填充附加属性筛选器
             const additionalFilter = document.getElementById('additional-attribute-filter');
+            const savedAdditional = additionalFilter.value;
             additionalFilter.innerHTML = `<option value="all">${t('全部附加属性')}</option>`;
             additionalAttributes.forEach(attr => {
                 const option = document.createElement('option');
@@ -502,9 +516,11 @@
                 option.textContent = t(attr);
                 additionalFilter.appendChild(option);
             });
+            additionalFilter.value = additionalAttributes.includes(savedAdditional) ? savedAdditional : 'all';
 
             // 填充技能属性筛选器
             const skillFilter = document.getElementById('skill-attribute-filter');
+            const savedSkill = skillFilter.value;
             skillFilter.innerHTML = `<option value="all">${t('全部技能属性')}</option>`;
             skillAttributes.forEach(attr => {
                 const option = document.createElement('option');
@@ -512,6 +528,7 @@
                 option.textContent = t(attr);
                 skillFilter.appendChild(option);
             });
+            skillFilter.value = skillAttributes.includes(savedSkill) ? savedSkill : 'all';
 
             // 绑定筛选器事件（使用 onchange 避免重复初始化导致重复绑定）
             baseFilter.onchange = renderWeaponSelection;
@@ -545,14 +562,11 @@
                 mainWeaponId = this.value ? parseInt(this.value) : null;
                 
                 // 如果选择了主刷武器，自动在下方选择对应的武器
-                if (mainWeaponId) {
-                    // 确保该武器ID在selectedWeaponIds中
-                    if (!selectedWeaponIds.includes(mainWeaponId)) {
-                        selectedWeaponIds.push(mainWeaponId);
-                        // 重新渲染武器选择列表以更新复选框状态
-                        renderWeaponSelection();
-                    }
+                if (mainWeaponId && !selectedWeaponIds.includes(mainWeaponId)) {
+                    selectedWeaponIds.push(mainWeaponId);
+                    renderWeaponSelection();
                 }
+                clearResults();
             };
         }
 
@@ -602,10 +616,15 @@
                 const checkbox = weaponCard.querySelector('.weapon-checkbox');
                 checkbox.addEventListener('change', function() {
                     if (this.checked) {
-                        selectedWeaponIds.push(parseInt(this.value));
+                        selectedWeaponIds.push(weapon.id);
                     } else {
-                        selectedWeaponIds = selectedWeaponIds.filter(id => id !== parseInt(this.value));
+                        selectedWeaponIds = selectedWeaponIds.filter(id => id !== weapon.id);
+                        if (mainWeaponId === weapon.id) {
+                            mainWeaponId = null;
+                            document.getElementById('main-weapon-select').value = '';
+                        }
                     }
+                    clearResults();
                 });
             });
         }
@@ -645,6 +664,7 @@
                 
                 // 重新渲染武器选择列表
                 renderWeaponSelection();
+                clearResults();
             });
             
             // 绑定清空选择按钮事件
@@ -656,105 +676,85 @@
                 
                 // 重新渲染武器选择列表
                 renderWeaponSelection();
+                clearResults();
             });
         });
 
 
 
-        // 计算最优属性组合
+        function compareRecommendations(a, b) {
+            return Number(b.coversMainWeapon) - Number(a.coversMainWeapon)
+                || b.selectedFarmableCount - a.selectedFarmableCount
+                || b.totalFarmableCount - a.totalFarmableCount
+                || b.score - a.score;
+        }
+
+        function getBaseCombinations(bases) {
+            if (bases.length <= 3) return [bases];
+
+            const combinations = [];
+            for (let first = 0; first < bases.length - 2; first++) {
+                for (let second = first + 1; second < bases.length - 1; second++) {
+                    for (let third = second + 1; third < bases.length; third++) {
+                        combinations.push([bases[first], bases[second], bases[third]]);
+                    }
+                }
+            }
+            return combinations;
+        }
+
         function calculateOptimalCombinations() {
-            // 检查是否选择了武器
             if (selectedWeaponIds.length === 0) {
                 alert(t('请至少选择一件武器'));
                 return;
             }
 
-            // 获取选中的武器
-            const selectedWeapons = weapons.filter(weapon => selectedWeaponIds.includes(weapon.id));
+            const selectedIds = new Set(selectedWeaponIds);
+            const allNodeResults = [];
 
-            // 存储所有淤积点的计算结果
-            let allNodeResults = [];
-
-            // 遍历所有淤积点，计算每个淤积点的最优组合
-            nodes.forEach(node => {
-                const nodeBases = node.availableBaseAttributes;
-                const nodeAdditions = node.availableAdditionalAttributes;
-                const nodeSkills = node.availableSkillAttributes;
-                const allAttrs = [
-                    ...nodeAdditions.map(a => ({ val: a, type: 'additional' })),
-                    ...nodeSkills.map(s => ({ val: s, type: 'skill' }))
+            for (const node of nodes) {
+                const nodeWeapons = weapons.filter(w =>
+                    node.availableBaseAttributes.includes(w.baseAttribute)
+                    && node.availableAdditionalAttributes.some(attr => isAttributeMatch(w.additionalAttribute, attr))
+                    && node.availableSkillAttributes.some(attr => isAttributeMatch(w.skillAttribute, attr))
+                );
+                const baseCombinations = getBaseCombinations(node.availableBaseAttributes);
+                const coreAttributes = [
+                    ...node.availableAdditionalAttributes.map(value => ({ value, type: 'additional', field: 'additionalAttribute' })),
+                    ...node.availableSkillAttributes.map(value => ({ value, type: 'skill', field: 'skillAttribute' }))
                 ];
-                allAttrs.forEach(targetAttr => {
-                    const matchedInNode = selectedWeapons.filter(w => {
-                        const canBaseDrop = nodeBases.includes(w.baseAttribute);
-                        const canAdditionDrop = nodeAdditions.some(a => isAttributeMatch(w.additionalAttribute, a));
-                        const canSkillDrop = nodeSkills.some(s => isAttributeMatch(w.skillAttribute, s));
-                        if (!(canBaseDrop && canAdditionDrop && canSkillDrop)) return false;
-                        return targetAttr.type === 'additional' ? 
-                            isAttributeMatch(w.additionalAttribute, targetAttr.val) : 
-                            isAttributeMatch(w.skillAttribute, targetAttr.val);
-                    });
-                    if (matchedInNode.length === 0) return;
-                    const potentialInNode = weapons.filter(w => {
-                        if (selectedWeaponIds.includes(w.id)) return false;
-                        const canBaseDrop = nodeBases.includes(w.baseAttribute);
-                        const canAdditionDrop = nodeAdditions.some(a => isAttributeMatch(w.additionalAttribute, a));
-                        const canSkillDrop = nodeSkills.some(s => isAttributeMatch(w.skillAttribute, s));
-                        if (!(canBaseDrop && canAdditionDrop && canSkillDrop)) return false;
-                        return targetAttr.type === 'additional' ? 
-                            isAttributeMatch(w.additionalAttribute, targetAttr.val) : 
-                            isAttributeMatch(w.skillAttribute, targetAttr.val);
-                    });
-                    const baseScoreMap = new Map();
-                    matchedInNode.forEach(w => {
-                        const baseScore = (w.rarity === 6 ? 20 : 10) + (w.id === mainWeaponId ? 50 : 0);
-                        baseScoreMap.set(w.baseAttribute, (baseScoreMap.get(w.baseAttribute) || 0) + baseScore);
-                    });
-                    potentialInNode.forEach(w => {
-                        const baseScore = (w.rarity === 6 ? 5 : 2);
-                        baseScoreMap.set(w.baseAttribute, (baseScoreMap.get(w.baseAttribute) || 0) + baseScore);
-                    });
 
-                    const finalBases = Array.from(baseScoreMap.entries())
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 3)
-                        .map(([base]) => base);
+                for (const core of coreAttributes) {
+                    const eligibleWeapons = nodeWeapons.filter(w => isAttributeMatch(w[core.field], core.value));
+                    let best = null;
 
-                    let totalScore = 0;
-                    const finalMatched = matchedInNode.filter(w => {
-                        if (!finalBases.includes(w.baseAttribute)) return false;
-                        totalScore += (w.rarity === 6 ? 20 : 10);
-                        if (w.id === mainWeaponId) totalScore += 50;
-                        return true;
-                    });
-                    const finalPotentials = potentialInNode.filter(pw => {
-                        if (!finalBases.includes(pw.baseAttribute)) return false;
-                        totalScore += (pw.rarity === 6 ? 5 : 2);
-                        return true;
-                    });
-                    const displayBases = [...finalBases];
-                    while (displayBases.length < 3) displayBases.push("其他属性择一");
-                    allNodeResults.push({
-                        nodeName: node.name, combination: { selectedBaseAttributes: displayBases, selectedAttribute: targetAttr.val, attributeType: targetAttr.type },
-                        score: totalScore,
-                        selectedFarmableCount: finalMatched.length,
-                        totalFarmableCount: finalMatched.length + finalPotentials.length,
-                        matchedWeapons: finalMatched,
-                        potentialWeapons: finalPotentials
-                    });
-                });
-            });
-            calculationResults = allNodeResults
-                .sort((a, b) => {
-                    if (b.selectedFarmableCount !== a.selectedFarmableCount) {
-                        return b.selectedFarmableCount - a.selectedFarmableCount;
+                    for (const bases of baseCombinations) {
+                        const matchingWeapons = eligibleWeapons.filter(w => bases.includes(w.baseAttribute));
+                        const matchedWeapons = matchingWeapons.filter(w => selectedIds.has(w.id));
+                        if (matchedWeapons.length === 0) continue;
+
+                        const potentialWeapons = matchingWeapons.filter(w => !selectedIds.has(w.id));
+                        const coversMainWeapon = matchedWeapons.some(w => w.id === mainWeaponId);
+                        const score = matchedWeapons.reduce((sum, w) => sum + (w.rarity === 6 ? 20 : 10), 0)
+                            + potentialWeapons.reduce((sum, w) => sum + (w.rarity === 6 ? 5 : 2), 0);
+                        const candidate = {
+                            nodeName: node.name,
+                            combination: { selectedBaseAttributes: bases, selectedAttribute: core.value, attributeType: core.type },
+                            coversMainWeapon,
+                            score,
+                            selectedFarmableCount: matchedWeapons.length,
+                            totalFarmableCount: matchingWeapons.length,
+                            matchedWeapons,
+                            potentialWeapons
+                        };
+                        if (!best || compareRecommendations(candidate, best) < 0) best = candidate;
                     }
-                    if (b.totalFarmableCount !== a.totalFarmableCount) {
-                        return b.totalFarmableCount - a.totalFarmableCount;
-                    }
-                    return b.score - a.score;
-                })
-                .slice(0, 10);
+
+                    if (best) allNodeResults.push(best);
+                }
+            }
+
+            calculationResults = allNodeResults.sort(compareRecommendations).slice(0, 10);
             displayResults();
         }
 
@@ -777,15 +777,23 @@
             return normalizedWeaponAttr === normalizedNodeAttr;
         }
 
-        // 显示计算结果
+        function clearResults() {
+            calculationResults = null;
+            displayResults();
+        }
+
         function displayResults() {
-            // 隐藏空结果提示
-            document.getElementById('empty-results').classList.add('hidden');
-            // 显示结果容器
-            document.getElementById('results-container').classList.remove('hidden');
-            
-            // 渲染推荐策略卡片
-            renderRecommendationsCards();
+            const hasResults = Boolean(calculationResults?.length);
+            document.getElementById('empty-results').classList.toggle('hidden', hasResults);
+            document.getElementById('results-container').classList.toggle('hidden', !hasResults);
+            if (hasResults) {
+                renderRecommendationsCards();
+            } else {
+                document.getElementById('recommendations-container').innerHTML = '';
+                document.getElementById('ui-empty-msg').innerText = t(calculationResults === null
+                    ? '请选择武器，然后点击“计算最优选择”'
+                    : '没有找到匹配所选武器的刷取方案');
+            }
         }
 
         function renderWeaponSpan(w) {
@@ -809,10 +817,9 @@
                 const card = document.createElement('div');
                 card.className = 'bg-white border-2 border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-all p-5 mb-6';
                 const attrType = result.combination.attributeType === 'additional' ? t('附加') : t('技能');
-                const baseHtml = result.combination.selectedBaseAttributes.map(attr => {
-                    if (attr === "其他属性择一") return `<span class="text-gray-400 italic font-normal">${t(attr)}</span>`;
-                    return `<span class="text-blue-700 font-bold">${t(attr).replace(t('提升'), '')}</span>`;
-                }).join('<span class="text-gray-300 mx-2">/</span>');
+                const baseHtml = result.combination.selectedBaseAttributes
+                    .map(attr => `<span class="text-blue-700 font-bold">${t(attr).replace(t('提升'), '')}</span>`)
+                    .join('<span class="text-gray-300 mx-2">/</span>');
 
                 const comboMap = new Map();
                 [...result.matchedWeapons, ...result.potentialWeapons].forEach(w => {
